@@ -17,4 +17,4 @@ Spoofs SecureTick to allways be within the valid period for the PsmDrmBoot and K
 
 Download: https://bitbucket.org/SilicaAndPina/makepsmgreatagain/downloads/MakePsmGreatAgain.skprx  
 
-(How do i install PSM Dev?)[https://pastebin.com/8mGXtC57]
+[How do i install PSM Dev?](https://pastebin.com/8mGXtC57)
