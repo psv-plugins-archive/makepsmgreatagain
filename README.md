@@ -16,3 +16,5 @@ Re-Enable's SceUsbSerial for ALL applications (yes, if u want to use it on your 
 Spoofs SecureTick to allways be within the valid period for the PsmDrmBoot and KConsole Cache (Publsihing License will never expire)
 
 Download: https://bitbucket.org/SilicaAndPina/makepsmgreatagain/downloads/MakePsmGreatAgain.skprx  
+
+(How do i install PSM Dev?)[https://pastebin.com/8mGXtC57]
