@@ -110,6 +110,7 @@ int ksceRtcGetCurrentSecureTick_patched(unsigned int* timestamp) //fake valid ti
 		{
 			printf("Releasing rtcHook\n");
 			if(rtcHook >= 0)taiHookReleaseForKernel(rtcHook, rtcHook_ref);
+			rtcHook = -1;
 			hookReleased = 1;
 		}
 	}
