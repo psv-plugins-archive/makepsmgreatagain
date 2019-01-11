@@ -77,6 +77,8 @@ static tai_hook_ref_t runHook_ref;
 static int isAllowedSerialHook = -1;
 static tai_hook_ref_t isAllowedSerial_ref;
 
+
+
 int ret = 0;
 int pid;
 
@@ -146,7 +148,7 @@ int ksceRtcGetCurrentTick_patched(unsigned int* timestamp) //fake valid time
 	return ret;
 }
 
-int isAllowedSerial_patch(int arg1, int arg2, int arg3, int arg4) { //Tell f00d to fuck off
+int isAllowedSerial_patch(int arg1, int arg2, int arg3, int arg4) { //Not acturally needed for reF00D but kept to remain backwards-compadible with RePatch compati packs.
   TAI_CONTINUE(int, isAllowedSerial_ref,arg1,arg2,arg3,arg4);
   return 1; 
 }
@@ -163,8 +165,8 @@ static SceUID _ksceKernelLaunchAppPatched(void *args)
 	
     if ((flags == 0x1000000 && strstr(path, "PCSI00007"))) //SUITE
     {
-								 
-		
+		ksceIoMkdir("ux0:/cache",6);
+		ksceIoMkdir("ux0:/cache/PCSI00007",6);
 		ksceIoMkdir("ux0:/cache/PCSI00007/_System",6);
 			
 		if(!fileExists("ux0:/cache/PCSI00007/_System/Code"))
@@ -199,9 +201,11 @@ static SceUID _ksceKernelLaunchAppPatched(void *args)
 			char *NewPath;
 			NewPath = path + sizeof("ux0:/patch/PCSI00007/") - 1;
 			snprintf(buf,1024,"ux0:/repatch/PCSI00007/%s",NewPath);
-			
-			ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
-			return ret;
+			if(fileExists(buf))
+			{
+				ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
+				return ret;
+			}
 		}
 		
 		if ((flags == 0x1000000 && strstr(path, "ux0:/app/PCSI00007")))
@@ -211,9 +215,11 @@ static SceUID _ksceKernelLaunchAppPatched(void *args)
 			char *NewPath;
 			NewPath = path + sizeof("ux0:/app/PCSI00007/") - 1;
 			snprintf(buf,1024,"ux0:/repatch/PCSI00007/%s",NewPath);
-			
-			ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
-			return ret;
+			if(fileExists(buf))
+			{
+				ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
+				return ret;
+			}
 		}
 		
 		ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, path, unk);
@@ -224,6 +230,9 @@ static SceUID _ksceKernelLaunchAppPatched(void *args)
 	
 	if ((flags == 0x1000000 && strstr(path, "PCSI00009"))) //UNITY
     {
+		ksceIoMkdir("ux0:/cache",6);
+		ksceIoMkdir("ux0:/cache/PCSI00009",6);
+		ksceIoMkdir("ux0:/cache/PCSI00009/_System",6);
 		
 		if(strstr(path,"eboot.bin")) //MAIN SELF
 		{
@@ -286,9 +295,11 @@ static SceUID _ksceKernelLaunchAppPatched(void *args)
 			char *NewPath;
 			NewPath = path + sizeof("ux0:/patch/PCSI00009/") - 1;
 			snprintf(buf,1024,"ux0:/repatch/PCSI00009/%s",NewPath);
-			
-			ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
-			return ret;
+			if(fileExists(buf))
+			{
+				ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
+				return ret;
+			}
 		}
 		
 		if ((flags == 0x1000000 && strstr(path, "ux0:/app/PCSI00009")))
@@ -298,11 +309,12 @@ static SceUID _ksceKernelLaunchAppPatched(void *args)
 			char *NewPath;
 			NewPath = path + sizeof("ux0:/app/PCSI00009/") - 1;
 			snprintf(buf,1024,"ux0:/repatch/PCSI00009/%s",NewPath);
-			
-			ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
-			return ret;
+			if(fileExists(buf))
+			{
+				ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
+				return ret;
+			}
 		}
-		
 		ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, path, unk);
 		
 		return ret;
@@ -324,6 +336,8 @@ static SceUID ksceKernelLaunchApp_patched(char *titleid, uint32_t flags, char *p
 }
 
 
+
+
 void _start() __attribute__ ((weak, alias ("module_start")));
 int module_start(SceSize argc, const void *args)
 {
@@ -338,18 +352,18 @@ int module_start(SceSize argc, const void *args)
 								0x0351D827, // SceRtcForDriver
 								0x401C0954, // ksceRtcGetCurrentSecureTick
 								ksceRtcGetCurrentSecureTick_patched);
-								
-	isAllowedSerialHook = taiHookFunctionExportForKernel(KERNEL_PID,
+	if(fileExists("ux0:/repatch/PCSI00009/eboot.bin") || fileExists("ux0:/repatch/PCSI00007/eboot.bin"))
+	{
+		isAllowedSerialHook = taiHookFunctionExportForKernel(KERNEL_PID,
 								&isAllowedSerial_ref, 
 								"SceSblACMgr",
 								0x9AD8E213, // SceSblACMgrForDriver
 								0x062CAEB2, // isAllowedSerial
 								isAllowedSerial_patch);
-
-								  
+		printf("isAllowedSerialHook: %x\n",isAllowedSerialHook);
+	}
 	printf("RunHook: %x\n",runHook);
 	printf("SecureHook: %x\n",secureHook);
-	printf("isAllowedSerialHook: %x\n",isAllowedSerialHook);
 	
 	return SCE_KERNEL_START_SUCCESS;
 }
