@@ -11,6 +11,10 @@ Install under \*KERNEL
 Where gonna Build a wall and make Sony pay for it!
 Probably with he money they stole from us
 by deleting our PSM Purchases 
+# V1.3 -
+Now works with reF00D plugin by dots_tb (as well as repatch) 
+
+Download: https://bitbucket.org/SilicaAndPina/makepsmgreatagain/downloads/MakePsmGreatAgain-v1.3.skprx
 
 # v1.2 -
 Infinite Publishing License for PSM Dev for Unity (PCSI00009)  
