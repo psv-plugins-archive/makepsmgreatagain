@@ -2,8 +2,6 @@
 
 Modifications to the PSM Developer applications
 
-Re-Enables USB Serial Mode, and gives PSM Developer Applications infinite publishing licenses 
-
 To install plugin:
 ```
 *PCSI00007
