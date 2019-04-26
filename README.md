@@ -21,7 +21,7 @@ by deleting our PSM Purchases
 Switched to Userland Plugin (.suprx)    
 Now enables "SecurityCritical" on all apps in PSM Dev (FOR ULTIMATE C# CAPIBILITYS!)     
 You can now use Start + UP to exit back to the PSM Developer application.     
-Probably only reF00D works now xD        
+Probably only reF00D works with it now xD        
     
 Download: https://bitbucket.org/SilicaAndPina/makepsmgreatagain/downloads/MakePsmGreatAgain.suprx    
     
