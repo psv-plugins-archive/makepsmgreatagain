@@ -4,14 +4,14 @@ Modifications to the PSM Developer applications
 
 Re-Enables USB Serial Mode, and gives PSM Developer Applications infinite publishing licenses 
 
-To install:
+To install plugin:
 ```
 *PCSI00007
 ux0:/tai/MakePsmGreatAgain.suprx
 *PCSI00009
 ux0:/tai/MakePsmGreatAgain.suprx
 ```
-
+(use ur0 if prefered)
 
 [How do i install PSM Dev?](https://pastebin.com/8mGXtC57)
 
