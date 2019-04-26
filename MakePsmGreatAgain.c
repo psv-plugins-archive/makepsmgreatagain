@@ -1,6 +1,7 @@
-// SilicaAndPina
-// IDU Spoofer/Package Installer Enabler
-// TAIHEN Edition!
+//MakePSMGreatAgain
+//Build a wall and make Sony pay for it!
+//Probably with he money they stole from us
+//by deleting our PSM Purchases 
 
 #include <psp2/kernel/modulemgr.h>
 #include <taihen.h>
