@@ -2,7 +2,14 @@
 
 Modifications to the PSM Developer applications
 
-To install plugin:
+Features:     
++ Never-Ending Publishing License. - While MakePsmGreatAgain is active, you dont have to "Refresh License" with PSM+     
++ USB Serial Mode Re-Enabled - Can connect PC to Development Assistant via USB      
++ PSMPlus Publishing Keys - Homebrew signed with PSMPlus Keys all consoles with MakePsmGreatAgain     
++ Exit with Start+Up - While a PSM app is running, You can press Start+Up to return back to Developer Assistant     
++ All applications are "SecurityCritcal" - Enables ALL .NET functions, including ones marked 'unsafe'     
+     
+# Installation
 ```
 *PCSI00007
 ux0:/tai/MakePsmGreatAgain.suprx
@@ -10,6 +17,8 @@ ux0:/tai/MakePsmGreatAgain.suprx
 ux0:/tai/MakePsmGreatAgain.suprx
 ```
 (use ur0 if prefered)
+
+# FAQ 
 
 [How do i install PSM Dev?](https://pastebin.com/8mGXtC57)
 
