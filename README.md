@@ -21,7 +21,7 @@ by deleting our PSM Purchases
 Switched to Userland Plugin (.suprx)    
 Now enables "SecurityCritical" on all apps in PSM Dev (FOR ULTIMATE C# CAPIBILITYS!)     
 You can now use Start + UP to exit back to the PSM Developer application.     
-Repatch no longer works for PSM Unity, until dots-tb fixes his plugin..     
+Repatch no longer works for PSM Unity, until dots-tb fixes his plugin.. just use reF00D its better anyway           
     
 Download: https://bitbucket.org/SilicaAndPina/makepsmgreatagain/downloads/MakePsmGreatAgain.suprx    
     
