@@ -1,5 +1,4 @@
 # MakePsmGreatAgain
-
 Modifications to the PSM Developer applications
 
 Features:     
@@ -8,7 +7,13 @@ Features:
 + PSMPlus Publishing Keys - Homebrew signed with PSMPlus Keys all consoles with MakePsmGreatAgain     
 + Exit with Start+Up - While a PSM app is running, You can press Start+Up to return back to Developer Assistant     
 + All applications are "SecurityCritcal" - Enables ALL .NET functions, including ones marked 'unsafe'     
-     
+    
+Where gonna Build a wall and make Sony pay for it!    
+Probably with he money they stole from us    
+by deleting our PSM Purchases    
+    
+(Note: As PSM Dev is revoked in f00d you need reF00D or rePatch with a compati pack in order to run it)     
+
 # Installation
 ```
 *PCSI00007
@@ -18,14 +23,11 @@ ux0:/tai/MakePsmGreatAgain.suprx
 ```
 (use ur0 if prefered)
 
-# FAQ 
-
-[How do i install PSM Dev?](https://pastebin.com/8mGXtC57)
-
-Where gonna Build a wall and make Sony pay for it!
-Probably with he money they stole from us
-by deleting our PSM Purchases 
-
+# FAQ     
+    
+[How do i install PSM Dev?](https://www.youtube.com/watch?v=CuxaVTyAVn8)    
+[How do i install the PSM SDK?](https://www.youtube.com/watch?v=KoZ1xVNTjUc)    
+    
 # V1.4 -
 Switched to Userland Plugin (.suprx)    
 Now enables "SecurityCritical" on all apps in PSM Dev (FOR ULTIMATE C# CAPIBILITYS!)     
