@@ -1,31 +1,41 @@
-//MakePSMGreatAgain
-//Build a wall and make Sony pay for it!
-//Probably with he money they stole from us
-//by deleting our PSM Purchases 
+// SilicaAndPina
+// IDU Spoofer/Package Installer Enabler
+// TAIHEN Edition!
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-
+#include <psp2/kernel/modulemgr.h>
 #include <taihen.h>
-#include <vitasdkkern.h>
-
+#include <string.h>
+#include <vitasdk.h>
 #include "licenseinfo.h"
 
-#define printf ksceDebugPrintf
+static SceUID CacheMounted;
+static tai_hook_ref_t CacheMounted_ref;
 
-//e23e8c7b15a198 SUITE
-//e23e8c93b8ed90 UNITY
+static SceUID SuiteCheckDrm;
+static tai_hook_ref_t SuiteCheckDrm_ref;
 
-int gameRunning = 0;
-int hookReleased = 0;
+static SceUID UnityCheckDrm;
+static tai_hook_ref_t UnityCheckDrm_ref;
+
+static SceUID SecurityCritical;
+static tai_hook_ref_t SecurityCritical_ref;
+
+static SceUID PeekPositive;
+static tai_hook_ref_t PeekPositive_ref;
+
+static SceUID LoadModuleHook = -1;
+static tai_hook_ref_t LoadModuleHook_ref;
+
+
+char titleid[12];
+
 
 int getFileSize(const char *file) {
-	SceUID fd = ksceIoOpen(file, SCE_O_RDONLY, 0);
+	SceUID fd = sceIoOpen(file, SCE_O_RDONLY, 0);
 	if (fd < 0)
 		return fd;
-	int fileSize = ksceIoLseek(fd, 0, SCE_SEEK_END);
-	ksceIoClose(fd);
+	int fileSize = sceIoLseek(fd, 0, SCE_SEEK_END);
+	sceIoClose(fd);
 	return fileSize;
 }
 
@@ -42,333 +52,215 @@ int fileExists(const char *file) {
 
 
 int ReadFile(char *file, void *buf, int size) {
-	SceUID fd = ksceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
+	SceUID fd = sceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
 	if (fd < 0)
 		return fd;
 
-	int read = ksceIoRead(fd, buf, size);
+	int read = sceIoRead(fd, buf, size);
 
-	ksceIoClose(fd);
+	sceIoClose(fd);
 	return read;
 }
 
 
 int WriteFile(char *file, void *buf, int size) {
-	SceUID fd = ksceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
+	SceUID fd = sceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
 	if (fd < 0)
 		return fd;
 
-	int written = ksceIoWrite(fd, buf, size);
+	int written = sceIoWrite(fd, buf, size);
 
-	ksceIoClose(fd);
+	sceIoClose(fd);
 	return written;
 }
 
+static int sceCtrlPeekBufferPositive_patched(int port, SceCtrlData *ctrl, int count) {
+    int ret = TAI_CONTINUE(int, PeekPositive_ref, port, ctrl, count);
+	
+	if((ctrl->buttons & (SCE_CTRL_START|SCE_CTRL_UP)) == (SCE_CTRL_START|SCE_CTRL_UP))
+	{
+		sceAppMgrSetInfobarState(0, 0, 0);
+		sceAppMgrLoadExec("app0:/eboot.bin", 0, 0);
+	}
+	
+	return ret;
+}   
 
-static int secureHook = -1;
-static tai_hook_ref_t secureHook_ref;
+int sceAppUtilCacheMount_patched(){
+	int ret;
+	ret = TAI_CONTINUE(int, CacheMounted_ref);
+	
+	sceIoMkdir("cache0:/_System",6);
+		
+	if(!fileExists("cache0:/_System/Code"))
+	{
+		sceClibPrintf("Writing 'Code'\n");
+		if(!strcmp(titleid,"PCSI00007"))
+			WriteFile("cache0:/_System/Code",&SUITE_CODE,sizeof(SUITE_CODE));
+		else
+			WriteFile("cache0:/_System/Code",&UNITY_CODE,sizeof(UNITY_CODE));
+	}
+	
+	if(!fileExists("cache0:/_System/target_kdbg_list.dat"))
+	{
+		sceClibPrintf("Writing 'target_kdbg_list'\n");
+		if(!strcmp(titleid,"PCSI00007"))
+			WriteFile("cache0:/_System/target_kdbg_list.dat",&SUITE_TARGET,sizeof(SUITE_TARGET));
+		else
+			WriteFile("cache0:/_System/target_kdbg_list.dat",&UNITY_TARGET,sizeof(UNITY_TARGET));
+	}
+	
+	if(!fileExists("cache0:/_System/vseed.dat"))
+	{
+		sceClibPrintf("Writing 'vseed'\n");
+		if(!strcmp(titleid,"PCSI00007"))
+			WriteFile("cache0:/_System/vseed.dat",&SUITE_VSEED,sizeof(SUITE_VSEED));
+		else
+			WriteFile("cache0:/_System/vseed.dat",&UNITY_VSEED,sizeof(UNITY_VSEED));
+	}
+	
+	if(!fileExists("cache0:/_System/protected_kconsole_cache.dat"))
+	{
+		sceClibPrintf("Writing 'protected_kconsole_cache'\n");
+		if(!strcmp(titleid,"PCSI00007"))
+			WriteFile("cache0:/_System/protected_kconsole_cache.dat",&SUITE_KCONSOLE, sizeof(SUITE_KCONSOLE));
+		else
+			WriteFile("cache0:/_System/protected_kconsole_cache.dat",&UNITY_KCONSOLE, sizeof(UNITY_KCONSOLE));
+	}
 
-static int rtcHook = -1;
-static tai_hook_ref_t rtcHook_ref;
+	if(!fileExists("cache0:/_System/psmdrmboot.dat"))
+	{
+		sceClibPrintf("Writing 'psmdrmboot'\n");
+		if(!strcmp(titleid,"PCSI00007"))
+			WriteFile("cache0:/_System/psmdrmboot.dat",&SUITE_PSMDRMBOOT, sizeof(SUITE_PSMDRMBOOT));
+		else
+			WriteFile("cache0:/_System/psmdrmboot.dat",&UNITY_PSMDRMBOOT, sizeof(UNITY_PSMDRMBOOT));
+	}
 
-static int runHook = -1;
-static tai_hook_ref_t runHook_ref;
-
-static int isAllowedSerialHook = -1;
-static tai_hook_ref_t isAllowedSerial_ref;
+	return ret;
+}
 
 
 
-int ret = 0;
-int pid;
-
-unsigned int SUITE_LICENSE_VALID[2] = {0x7b15a198,0xe23e8c};
-unsigned int UNITY_LICENSE_VALID[2] = {0x93b8ed90,0xe23e8c};
-
-char titleid[12];
-
-int ksceRtcGetCurrentSecureTick_patched(unsigned int* timestamp) //fake valid time
+int ret0 (int *args)
 {
-	printf("SceRtcGetSecure called!\n");
-	
-	ret = TAI_CONTINUE(int, secureHook_ref,timestamp);
-	
-	pid = ksceKernelGetProcessId();
-	ksceKernelGetProcessTitleId(pid,titleid,12);
-	
-	
-	if(!strcmp(titleid,"PCSI00007")) //SUITE
-	{
-	printf("Spoofing time to %x%x\n",SUITE_LICENSE_VALID[1],SUITE_LICENSE_VALID[0]);
-
-	timestamp[0] = SUITE_LICENSE_VALID[0];
-	timestamp[1] = SUITE_LICENSE_VALID[1];
 	return 0;
-	}
+}
+
+
+SceUID sceKernelLoadStartModule_patched(char *path, SceSize args, void *argp, int flags, SceKernelLMOption *option, int *status)
+{
+
 	
-	if(!strcmp(titleid,"PCSI00009")) //UNITY
+	SceUID ret;
+	ret = TAI_CONTINUE(SceUID, LoadModuleHook_ref, path, args, argp, flags, option, status);
+
+	if(strstr(path,"libmono.suprx")) //PSM
 	{
-		if(gameRunning)
-		{
-			printf("Releasing rtcHook\n");
-			if(rtcHook >= 0)taiHookReleaseForKernel(rtcHook, rtcHook_ref);
-			rtcHook = -1;
-			hookReleased = 1;
-		}
+		
+				SecurityCritical = taiHookFunctionExport(&SecurityCritical_ref, 
+														  "SceLibMono",
+														  TAI_ANY_LIBRARY,
+														  0x02A867BC, //mono_security_enable_core_clr 
+														  ret0);
+				sceClibPrintf("SecurityCritical: %x\n",SecurityCritical);
 	}
 	
+	if(strstr(path,"libpsm.suprx")) //PSM
+	{
+		
+				PeekPositive = taiHookFunctionImport(&PeekPositive_ref, 
+										  "SceLibPsm",
+										  TAI_ANY_LIBRARY,
+										  0xA9C3CED6, // sceCtrlPeekBufferPositive
+										  sceCtrlPeekBufferPositive_patched);
+				sceClibPrintf("PeekPositive: %x\n",PeekPositive);
+	}
+	
+	if(strstr(path,"libScePsmEdata.suprx")) //PSM Unity
+	{
+		
+				UnityCheckDrm = taiHookFunctionOffset(&UnityCheckDrm_ref, 
+														ret,
+														0,
+														0x5a62, //PsmDrmBootCheck
+														1, 
+														ret0);
+				sceClibPrintf("UnityCheckDrm: %x\n",UnityCheckDrm);
+	}
 	
 	return ret;
 }
 
-int ksceRtcGetCurrentTick_patched(unsigned int* timestamp) //fake valid time
-{
+
+void _start() __attribute__ ((weak, alias ("module_start"))); 
+void module_start(SceSize argc, const void *args) {
+
+	sceAppMgrAppParamGetString(0, 12, titleid, 256);
 	
-	ret = TAI_CONTINUE(int, secureHook_ref,timestamp);
-	
-	if(hookReleased) // sanity check
+	if(!strcmp(titleid,"PCSI00007"))
 	{
-		printf("WARN: Hook was NOT released properly!\n");
-		return ret;
+		tai_module_info_t tai_info;
+		tai_info.size = sizeof(tai_module_info_t);
+		taiGetModuleInfo("ScePsmDev", &tai_info);
+
+		SuiteCheckDrm = taiHookFunctionOffset(&SuiteCheckDrm_ref, 
+												tai_info.modid,
+												0,
+												0xbe2, //SuiteCheckDrm
+												1, 
+												ret0);
+		sceClibPrintf("SuiteCheckDrmHook: %x\n",SuiteCheckDrm);
 	}
 	
-	pid = ksceKernelGetProcessId();
-	ksceKernelGetProcessTitleId(pid,titleid,12);
-	
-
-	if(!strcmp(titleid,"PCSI00009")) //UNITY (nice fail on license check lol https://twitter.com/SilicaDevs/status/1081758443495514112)
+	if(!strcmp(titleid,"PCSI00009"))
 	{
-	printf("Spoofing time to %x%x\n",UNITY_LICENSE_VALID[1],UNITY_LICENSE_VALID[0]);
+		tai_module_info_t tai_info;
+		tai_info.size = sizeof(tai_module_info_t);
+		taiGetModuleInfo(TAI_MAIN_MODULE, &tai_info);
+		if(strstr(tai_info.name, "Unity"))
+		{
+			PeekPositive = taiHookFunctionImport(&PeekPositive_ref, 
+						  TAI_MAIN_MODULE,
+						  TAI_ANY_LIBRARY,
+						  0x15F81E8C, // sceCtrlPeekBufferPositive2
+						  sceCtrlPeekBufferPositive_patched);
+			sceClibPrintf("PeekPositive: %x\n",PeekPositive);
+		}
+	}
 
-	timestamp[0] = UNITY_LICENSE_VALID[0];
-	timestamp[1] = UNITY_LICENSE_VALID[1];
-	return 0;
+	if(!strcmp(titleid,"PCSI00007") || !strcmp(titleid,"PCSI00009")) // PSM Runtime & PSM Unity Runtime
+	{
+		sceClibPrintf("Silca: I like to see girls die :3\n");
+		sceClibPrintf("Loaded!\n");
+		sceClibPrintf("Running on %s\n",titleid);
+
+		CacheMounted = taiHookFunctionImport(&CacheMounted_ref, 
+								  TAI_MAIN_MODULE,
+								  TAI_ANY_LIBRARY,
+								  0x0AA56143, //sceAppUtilCacheMount
+								  sceAppUtilCacheMount_patched);
+
+								  
+     	LoadModuleHook = taiHookFunctionImport(&LoadModuleHook_ref, 
+								  TAI_MAIN_MODULE,
+								  TAI_ANY_LIBRARY,
+								  0x2DCC4AFA, //sceKernelLoadStartModule
+								  sceKernelLoadStartModule_patched);
+								  
+		sceClibPrintf("LoadModuleHook: %x\n",LoadModuleHook);
 	}
 	
-	return ret;
+
 }
 
-int isAllowedSerial_patch(int arg1, int arg2, int arg3, int arg4) { //Not acturally needed for reF00D but kept to remain backwards-compadible with RePatch compati packs.
-  TAI_CONTINUE(int, isAllowedSerial_ref,arg1,arg2,arg3,arg4);
-  return 1; 
-}
+int module_stop(SceSize argc, const void *args) {
 
-
-static SceUID _ksceKernelLaunchAppPatched(void *args)
-{
-    char *titleid = (char *)((uintptr_t *)args)[0];
-    uint32_t flags = (uint32_t)((uintptr_t *)args)[1];
-    char *path = (char *)((uintptr_t *)args)[2];
-    void *unk = (void *)((uintptr_t *)args)[3];
+  // release hooks
+	if (CacheMounted >= 0) taiHookRelease(CacheMounted, CacheMounted_ref);
+	if (SuiteCheckDrm >= 0) taiHookRelease(SuiteCheckDrm, SuiteCheckDrm_ref);
+	if (LoadModuleHook >= 0) taiHookRelease(LoadModuleHook, LoadModuleHook_ref);
+	if (SecurityCritical >= 0) taiHookRelease(SecurityCritical, SecurityCritical_ref);
 	
-	printf("Loading SELF: %s\n",path);
-	
-    if ((flags == 0x1000000 && strstr(path, "PCSI00007"))) //SUITE
-    {
-		ksceIoMkdir("ux0:/cache",6);
-		ksceIoMkdir("ux0:/cache/PCSI00007",6);
-		ksceIoMkdir("ux0:/cache/PCSI00007/_System",6);
-			
-		if(!fileExists("ux0:/cache/PCSI00007/_System/Code"))
-		{
-			printf("Writing 'Code'\n");
-			WriteFile("ux0:/cache/PCSI00007/_System/Code",&SUITE_CODE,sizeof(SUITE_CODE));
-		}
-		
-		if(!fileExists("ux0:/cache/PCSI00007/_System/target_kdbg_list.dat"))
-		{
-			printf("Writing 'target_kdbg_list'\n");
-			WriteFile("ux0:/cache/PCSI00007/_System/target_kdbg_list.dat",&SUITE_TARGET,sizeof(SUITE_TARGET));
-		}
-		
-		if(!fileExists("ux0:/cache/PCSI00007/_System/vseed.dat"))
-		{
-			printf("Writing 'vseed'\n");
-			WriteFile("ux0:/cache/PCSI00007/_System/vseed.dat",&SUITE_VSEED,sizeof(SUITE_VSEED));
-		}
-		
-		//Write KConsole and PSMDrmBoot
-		printf("Writing 'protected_kconsole_cache'\n");
-		WriteFile("ux0:/cache/PCSI00007/_System/protected_kconsole_cache.dat",&SUITE_KCONSOLE, sizeof(SUITE_KCONSOLE));
-		printf("Writing 'psmdrmboot'\n");
-		WriteFile("ux0:/cache/PCSI00007/_System/psmdrmboot.dat",&SUITE_PSMDRMBOOT, sizeof(SUITE_PSMDRMBOOT));
-
-		//Add case to fix dots-tb's broken repatch plugin (TEMPORARY)
-		if ((flags == 0x1000000 && strstr(path, "ux0:/patch/PCSI00007"))) 
-		{
-			char buf[1024];
-			memset(buf,0x00,1024);
-			char *NewPath;
-			NewPath = path + sizeof("ux0:/patch/PCSI00007/") - 1;
-			snprintf(buf,1024,"ux0:/repatch/PCSI00007/%s",NewPath);
-			if(fileExists(buf))
-			{
-				ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
-				return ret;
-			}
-		}
-		
-		if ((flags == 0x1000000 && strstr(path, "ux0:/app/PCSI00007")))
-		{
-			char buf[1024];
-			memset(buf,0x00,1024);
-			char *NewPath;
-			NewPath = path + sizeof("ux0:/app/PCSI00007/") - 1;
-			snprintf(buf,1024,"ux0:/repatch/PCSI00007/%s",NewPath);
-			if(fileExists(buf))
-			{
-				ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
-				return ret;
-			}
-		}
-		
-		ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, path, unk);
-		
-		return ret;
-		
-    }
-	
-	if ((flags == 0x1000000 && strstr(path, "PCSI00009"))) //UNITY
-    {
-		ksceIoMkdir("ux0:/cache",6);
-		ksceIoMkdir("ux0:/cache/PCSI00009",6);
-		ksceIoMkdir("ux0:/cache/PCSI00009/_System",6);
-		
-		if(strstr(path,"eboot.bin")) //MAIN SELF
-		{
-			
-			printf("Main Dev Suite running!\n");
-			gameRunning = 0;
-			hookReleased = 0;
-			if(rtcHook <= 0)
-			{
-				rtcHook = taiHookFunctionExportForKernel(KERNEL_PID,
-											&rtcHook_ref, 
-											"SceRtc",
-											0x0351D827, // SceRtcForDriver
-											0xDEC408D4, // ksceRtcGetCurrentTick
-											ksceRtcGetCurrentTick_patched);
-				printf("RtcHook: %x\n",rtcHook);
-			}
-			}
-		
-		if(strstr(path,".self")){
-		printf("Game Running!\n");
-		gameRunning = 1;
-		}
-		
-		ksceIoMkdir("ux0:/cache/PCSI00009/_System",6);
-			
-		if(!fileExists("ux0:/cache/PCSI00009/_System/Code"))
-		{
-			printf("Writing 'Code'\n");
-			WriteFile("ux0:/cache/PCSI00009/_System/Code",&UNITY_CODE,sizeof(UNITY_CODE));
-		}
-		
-		if(!fileExists("ux0:/cache/PCSI00009/_System/target_kdbg_list.dat"))
-		{
-			printf("Writing 'target_kdbg_list'\n");
-			WriteFile("ux0:/cache/PCSI00009/_System/target_kdbg_list.dat",&UNITY_TARGET,sizeof(UNITY_TARGET));
-		}
-		
-		if(!fileExists("ux0:/cache/PCSI00009/_System/vseed.dat"))
-		{
-			printf("Writing 'vseed'\n");
-			WriteFile("ux0:/cache/PCSI00009/_System/vseed.dat",&UNITY_VSEED,sizeof(UNITY_VSEED));
-		}
-		
-		//Write KConsole and PSMDrmBoot
-		printf("Writing 'protected_kconsole_cache'\n");
-		WriteFile("ux0:/cache/PCSI00009/_System/protected_kconsole_cache.dat",&UNITY_KCONSOLE, sizeof(UNITY_KCONSOLE));
-		printf("Writing 'psmdrmboot'\n");
-		
-		WriteFile("ux0:/cache/PCSI00009/_System/psmdrmboot.dat",&UNITY_PSMDRMBOOT, sizeof(UNITY_PSMDRMBOOT));
-		
-		
-										
-		
-		//Add case to fix dots-tb's broken repatch plugin (TEMPORARY)
-		if ((flags == 0x1000000 && strstr(path, "ux0:/patch/PCSI00009"))) 
-		{
-			char buf[1024];
-			memset(buf,0x00,1024);
-			char *NewPath;
-			NewPath = path + sizeof("ux0:/patch/PCSI00009/") - 1;
-			snprintf(buf,1024,"ux0:/repatch/PCSI00009/%s",NewPath);
-			if(fileExists(buf))
-			{
-				ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
-				return ret;
-			}
-		}
-		
-		if ((flags == 0x1000000 && strstr(path, "ux0:/app/PCSI00009")))
-		{
-			char buf[1024];
-			memset(buf,0x00,1024);
-			char *NewPath;
-			NewPath = path + sizeof("ux0:/app/PCSI00009/") - 1;
-			snprintf(buf,1024,"ux0:/repatch/PCSI00009/%s",NewPath);
-			if(fileExists(buf))
-			{
-				ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, buf, unk);
-				return ret;
-			}
-		}
-		ret = TAI_CONTINUE(int, runHook_ref, titleid, flags, path, unk);
-		
-		return ret;
-		
-    }
-
-    return TAI_CONTINUE(int, runHook_ref, titleid, flags, path, unk); // returns pid
-}
-
-static SceUID ksceKernelLaunchApp_patched(char *titleid, uint32_t flags, char *path, void *unk)
-{
-    uintptr_t args[4];
-    args[0] = (uintptr_t)titleid;
-    args[1] = (uintptr_t)flags;
-    args[2] = (uintptr_t)path;
-    args[3] = (uintptr_t)unk;
-
-    return ksceKernelRunWithStack(0x4000, _ksceKernelLaunchAppPatched, args);
-}
-
-
-
-
-void _start() __attribute__ ((weak, alias ("module_start")));
-int module_start(SceSize argc, const void *args)
-{
-	
-	runHook = taiHookFunctionExportForKernel(KERNEL_PID, &runHook_ref, "SceProcessmgr", 0x7A69DE86, 0x71CF71FD, ksceKernelLaunchApp_patched);
-		if (runHook < 0)
-			runHook = taiHookFunctionExportForKernel(KERNEL_PID, &runHook_ref, "SceProcessmgr", 0xEB1F8EF7, 0x68068618, ksceKernelLaunchApp_patched);
-
-	secureHook = taiHookFunctionExportForKernel(KERNEL_PID,
-								&secureHook_ref, 
-								"SceRtc",
-								0x0351D827, // SceRtcForDriver
-								0x401C0954, // ksceRtcGetCurrentSecureTick
-								ksceRtcGetCurrentSecureTick_patched);
-	if(fileExists("ux0:/repatch/PCSI00009/eboot.bin") || fileExists("ux0:/repatch/PCSI00007/eboot.bin"))
-	{
-		isAllowedSerialHook = taiHookFunctionExportForKernel(KERNEL_PID,
-								&isAllowedSerial_ref, 
-								"SceSblACMgr",
-								0x9AD8E213, // SceSblACMgrForDriver
-								0x062CAEB2, // isAllowedSerial
-								isAllowedSerial_patch);
-		printf("isAllowedSerialHook: %x\n",isAllowedSerialHook);
-	}
-	printf("RunHook: %x\n",runHook);
-	printf("SecureHook: %x\n",secureHook);
-	
-	return SCE_KERNEL_START_SUCCESS;
-}
-
-int module_stop(SceSize argc, const void *args)
-{
-	return SCE_KERNEL_STOP_SUCCESS;
+  return SCE_KERNEL_STOP_SUCCESS;
 }

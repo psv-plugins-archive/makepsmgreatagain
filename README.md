@@ -1,32 +1,21 @@
-# MakePsmGreatAgain
+# IDUSpoof
+This is a plugin that spoofs IDU Mode (vshSysconIsIduMode) to allways return 0x1             
+this has the effect of tricking whatever application's its configured for into thinking its running in IDU mode.             
+in fact, if you do \*ALL it has the same effect as if you just enabled IDU mode!         
+the advantage to this plugin is ofcource that you can specify exactly what apps idu is set for.
 
-Modifications to the PSM Developer applications
+for example. if you want to enable the package installer. simply do          
+\*NPXS10031           
+ux0:tai/iduSpoof.suprx             
+           
+or enable IDU settings without IDU Mode:            
+             
+\*NPXS10015           
+ux0:tai/iduSpoof.suprx           
 
-Re-Enables USB Serial Mode, and gives PSM Developer Applications infinite publishing licenses 
+though keep in mind henkaku overwrites idu settings with its own.           
 
-Install under \*KERNEL
 
-[How do i install PSM Dev?](https://pastebin.com/8mGXtC57)
+!! WORKS ON 3.65 And 3.68!!           
 
-Where gonna Build a wall and make Sony pay for it!
-Probably with he money they stole from us
-by deleting our PSM Purchases 
-# V1.3 -
-Now works with reF00D plugin by dots_tb (as well as repatch) 
-
-Download: https://bitbucket.org/SilicaAndPina/makepsmgreatagain/downloads/MakePsmGreatAgain-v1.3.skprx
-
-# v1.2 -
-Infinite Publishing License for PSM Dev for Unity (PCSI00009)  
-PSM Dev for Unity, app/game launching acturally working now (fixed bugs that dots-tb didnt want to fix)
-
-Download: https://bitbucket.org/SilicaAndPina/makepsmgreatagain/downloads/MakePsmGreatAgain-v1.2.skprx
-
-# v1.0 -
-Automatically creates publishing license (if not allready created) at PSM Dev bootup (still need psm+ for development!)    
-Re-Enable's SceUsbSerial for ALL applications (yes, if u want to use it on your own homebrew, YOU CAN!)   
-Spoofs SecureTick to allways be within the valid period for the PsmDrmBoot and KConsole Cache (Publsihing License will never expire)   
-Note: Only PSM Dev Suite supported in v1.0  
-
-Download: https://bitbucket.org/SilicaAndPina/makepsmgreatagain/downloads/MakePsmGreatAgain.skprx  
-
+Download: https://bitbucket.org/SilicaAndPina/iduspoof/downloads/iduSpoof.suprx
