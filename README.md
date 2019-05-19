@@ -30,7 +30,7 @@ ux0:/tai/MakePsmGreatAgain.suprx
     
 # V1.4 -
 Switched to Userland Plugin (.suprx)    
-Now enables "SecurityCritical" on all apps in PSM Dev (FOR ULTIMATE C# CAPIBILITYS!)     
+Now enables "SecurityCritical" on all apps in PSM Dev (FOR ULTIMATE C# CAPIBILITYS!) - thx doubletoker     
 You can now use Start + UP to exit back to the PSM Developer application.     
 Probably only reF00D works with it now xD        
     
