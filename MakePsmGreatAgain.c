@@ -141,8 +141,6 @@ int sceAppUtilCacheMount_patched(){
 	return ret;
 }
 
-
-
 int ret0 (int *args)
 {
 	return 0;
@@ -167,20 +165,81 @@ SceUID sceKernelLoadStartModule_patched(char *path, SceSize args, void *argp, in
 				sceClibPrintf("SecurityCritical: %x\n",SecurityCritical);
 	}
 	
+	if(strstr(path,"libmono_bridge.suprx")) //PSM
+	{
+		/*
+			int SceLibMonoBridge_70493FB9
+              (char *sdk_version,undefined4 param_2,uint param_3,uint param_4,char *project_name,
+              undefined4 param_6,void *output)
+			  
+			find offset by following the 5th paramater, into 3 different functions.
+			you'll come accross a strcmp, lower down is a if(*unk_whatever = 1) 
+			thats the jump you wnat to patch.
+		*/
+		
+		tai_module_info_t info;
+		info.size = sizeof(tai_module_info_t);
+		taiGetModuleInfo("SceLibMonoBridge", &info);
+		uint16_t patched_instruction = 0xBF00;	//ARM9 "NO OPERATION"
+		
+		int ret = 0;
+		sceClibPrintf("%s: nid 0x%x\n",path,info.module_nid);
+		switch(info.module_nid)
+		{
+			case 0x28D9013B: //SDK 2.00
+				ret = taiInjectData(info.modid, 0, 0x132F8, &patched_instruction, 0x2); 
+				sceClibPrintf("TaiInjectData (sdk2.00) %x\n",ret);
+				break;
+			case 0x88B67542: //SDK 1.21
+				ret = taiInjectData(info.modid, 0, 0x12e48, &patched_instruction, 0x2); 
+				sceClibPrintf("TaiInjectData (sdk1.21) %x\n",ret);
+				break;
+		}
+	}
+	
 	if(strstr(path,"libpsm.suprx")) //PSM
 	{
-		
-				PeekPositive = taiHookFunctionImport(&PeekPositive_ref, 
-										  "SceLibPsm",
-										  TAI_ANY_LIBRARY,
-										  0xA9C3CED6, // sceCtrlPeekBufferPositive
-										  sceCtrlPeekBufferPositive_patched);
-				sceClibPrintf("PeekPositive: %x\n",PeekPositive);
+
+		PeekPositive = taiHookFunctionImport(&PeekPositive_ref, 
+											  "SceLibPsm",
+											  TAI_ANY_LIBRARY,
+											  0xA9C3CED6, // sceCtrlPeekBufferPositive
+											  sceCtrlPeekBufferPositive_patched);
+		sceClibPrintf("PeekPositive: %x\n",PeekPositive);
 	}
 	
 	if(strstr(path,"libScePsmEdata.suprx")) //PSM Unity
 	{
 		
+
+		/*
+		finding offsets for project_name
+			look at int ScePsmEdata_2EC7439C(int param_1,undefined4 param_2,uint param_3,uint param_4,char *project_name)
+
+			find offset by following the 5th paramater, into 3 different functions.
+			you'll come accross a strcmp, lower down is a if(*unk_whatever = 1) 
+			thats the jump you wnat to patch.
+		
+		for UnityCheckDrm look for sceIoGetStat, 
+			look at all cross references and the function
+			that contiains one that has arg1 "cache0:/_System"
+			is UnityCheckDrm().
+		*/
+		
+		tai_module_info_t info;
+		info.size = sizeof(tai_module_info_t);
+		taiGetModuleInfo("ScePsmEdata", &info);
+		uint16_t patched_instruction = 0xBF00;	//ARM9 "NO OPERATION"
+		
+		int ret = 0;
+		sceClibPrintf("%s: nid 0x%x\n",path,info.module_nid);
+		switch(info.module_nid)
+		{
+			case 0xB4657632: //Unity 4.3.7.0
+				ret = taiInjectData(info.modid, 0, 0x3b50, &patched_instruction, 0x2); //allow for all project_name 
+				sceClibPrintf("TaiInjectData (unity4.3.7.0) %x\n",ret);
+				
+				
 				UnityCheckDrm = taiHookFunctionOffset(&UnityCheckDrm_ref, 
 														ret,
 														0,
@@ -188,6 +247,21 @@ SceUID sceKernelLoadStartModule_patched(char *path, SceSize args, void *argp, in
 														1, 
 														ret0);
 				sceClibPrintf("UnityCheckDrm: %x\n",UnityCheckDrm);
+				
+				break;
+			case 0x21AE6754: //Unity Base
+				ret = taiInjectData(info.modid, 0, 0x10f9c, &patched_instruction, 0x2); //allow for all project_name
+				sceClibPrintf("TaiInjectData (unity base) %x\n",ret);
+				
+				UnityCheckDrm = taiHookFunctionOffset(&UnityCheckDrm_ref, 
+														ret,
+														0,
+														0x5a62, //PsmDrmBootCheck
+														1, 
+														ret0);
+				sceClibPrintf("UnityCheckDrm: %x\n",UnityCheckDrm);
+				break;
+		}
 	}
 	
 	return ret;
@@ -258,10 +332,13 @@ void module_start(SceSize argc, const void *args) {
 int module_stop(SceSize argc, const void *args) {
 
   // release hooks
+
 	if (CacheMounted >= 0) taiHookRelease(CacheMounted, CacheMounted_ref);
 	if (SuiteCheckDrm >= 0) taiHookRelease(SuiteCheckDrm, SuiteCheckDrm_ref);
-	if (LoadModuleHook >= 0) taiHookRelease(LoadModuleHook, LoadModuleHook_ref);
+	if (UnityCheckDrm >= 0) taiHookRelease(UnityCheckDrm, UnityCheckDrm_ref);
 	if (SecurityCritical >= 0) taiHookRelease(SecurityCritical, SecurityCritical_ref);
+	if (PeekPositive >= 0) taiHookRelease(PeekPositive, PeekPositive_ref);
+	if (LoadModuleHook >= 0) taiHookRelease(LoadModuleHook, LoadModuleHook_ref);
 	
   return SCE_KERNEL_STOP_SUCCESS;
 }
