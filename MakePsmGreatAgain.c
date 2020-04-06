@@ -241,7 +241,7 @@ SceUID sceKernelLoadStartModule_patched(char *path, SceSize args, void *argp, in
 				
 				
 				UnityCheckDrm = taiHookFunctionOffset(&UnityCheckDrm_ref, 
-														ret,
+														info.modid,
 														0,
 														0x5a62, //PsmDrmBootCheck
 														1, 
@@ -254,9 +254,9 @@ SceUID sceKernelLoadStartModule_patched(char *path, SceSize args, void *argp, in
 				sceClibPrintf("TaiInjectData (unity base) %x\n",ret);
 				
 				UnityCheckDrm = taiHookFunctionOffset(&UnityCheckDrm_ref, 
-														ret,
+														info.modid,
 														0,
-														0x5a62, //PsmDrmBootCheck
+														0x12eb2, //PsmDrmBootCheck
 														1, 
 														ret0);
 				sceClibPrintf("UnityCheckDrm: %x\n",UnityCheckDrm);
