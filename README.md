@@ -13,7 +13,7 @@ Where gonna Build a wall and make Sony pay for it!
 Probably with he money they stole from us    
 by deleting our PSM Purchases    
     
-(Note: As PSM Dev is revoked in f00d you need reF00D or rePatch with a compati pack in order to run it)     
+(Note: As PSM Dev is revoked in f00d you need reF00D/0syscall6 or rePatch with a compati pack in order to run it)     
 
 # Installation
 ```
