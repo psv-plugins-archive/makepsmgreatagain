@@ -7,7 +7,7 @@ Features:
 + PSMPlus Publishing Keys - Apps signed with PSMPlus Keys will work all consoles with MakePsmGreatAgain     
 + Exit with Start+Up - While a PSM app is running, You can press Start+Up to return back to Developer Assistant     
 + All applications are "SecurityCritcal" - Enables ALL .NET functions, including ones marked 'unsafe'     
-+ app.info "project_name" check patched (runtime only) - Enables games to run regardless of if "project_name" is set to "*" or "_PSM_DEFAULT_"
++ app.info "project_name" check patched (runtime only) - Enables games to run regardless of if "project_name" is set to "*"
 Where gonna Build a wall and make Sony pay for it!    
 Probably with he money they stole from us    
 by deleting our PSM Purchases    
