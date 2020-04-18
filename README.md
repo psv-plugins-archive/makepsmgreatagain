@@ -8,6 +8,7 @@ Features:
 + Exit with Start+Up - While a PSM app is running, You can press Start+Up to return back to Developer Assistant     
 + All applications are "SecurityCritcal" - Enables ALL .NET functions, including ones marked 'unsafe'     
 + app.info "project_name" check patched (runtime only) - Enables games to run regardless of if "project_name" is set to "*"
+
 Where gonna Build a wall and make Sony pay for it!    
 Probably with he money they stole from us    
 by deleting our PSM Purchases    
@@ -17,9 +18,9 @@ by deleting our PSM Purchases
 # Installation
 ```
 *PCSI00007
-ux0:/tai/MakePsmGreatAgain.suprx
+ux0:/tai/MakePsmGreatAgain-v1.5.suprx
 *PCSI00009
-ux0:/tai/MakePsmGreatAgain.suprx
+ux0:/tai/MakePsmGreatAgain-v1.5.suprx
 ```
 (use ur0 if prefered)
 
